@@ -10,9 +10,33 @@ M.add_mark = function(index)
     vim.notify("Cannot mark unnamed buffer", vim.log.levels.WARN)
     return
   end
-  marks[index] = buf_name -- Store the buffer name in the marks table
-  vim.notify("Mark " .. index .. " set to: " .. buf_name)
+
+  -- Check if the buffer is already assigned to another mark
+  local current_index
+  for i, name in pairs(marks) do
+    if name == buf_name then
+      current_index = i
+      break
+    end
+  end
+
+  if current_index then
+    if current_index == index then
+      -- No action if the buffer is already at the target mark
+      vim.notify("Buffer is already assigned to mark " .. index, vim.log.levels.INFO)
+      return
+    end
+    -- Swap marks if the buffer is already assigned
+    marks[current_index] = marks[index]
+    marks[index] = buf_name
+    vim.notify("Swapped marks: " .. current_index .. " <-> " .. index)
+  else
+    -- Simply assign the buffer to the new mark if no swap is needed
+    marks[index] = buf_name
+    vim.notify("Mark " .. index .. " set to: " .. buf_name)
+  end
 end
+
 
 -- Function to navigate to a specific mark
 M.goto_mark = function(index)
